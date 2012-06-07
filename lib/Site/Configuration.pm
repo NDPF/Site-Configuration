@@ -34,7 +34,7 @@ Version 0.01
 BEGIN {
   use Exporter ();
   our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-  $VERSION = "0.01";
+  $VERSION = "0.02";
   @ISA = qw(Exporter);
   @EXPORT = qw(&get_vo_param &readconfig);
   %EXPORT_TAGS = ( );
@@ -57,9 +57,9 @@ Ini files. (TODO: more explaining)
 
     use Site::Configuration;
 
-    my %ce = readconfig("ce.conf");
+    my $ceconf = readconfig("ce.conf");
 
-    my $node = $ce{CE};
+    my $node = $ce->{CE};
 
     ...
 
@@ -86,14 +86,15 @@ sub readconfig($) {
     ( -file => "$confdir/$conf", 
       -fallback => "DEFAULT",
       -handle_trailing_comment => 1,
-      -allowcontinue => 1) or
+      -allowcontinue => 1,
+      -nocase => 1) or
 	do {
 	  print STDERR $_ foreach @Config::IniFiles::errors;
 	  croak "Can't read configuration file $conf, stopped"
 	};
   # store the configuration hash. Why must this be a ref?
   $configuration{$conf} = \%ini;
-  return %ini;
+  return \%ini;
 };
 
 =head2 get_vo_param LIST
