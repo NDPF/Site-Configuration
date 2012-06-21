@@ -23,11 +23,11 @@ use Config::IniFiles;
 
 =head1 NAME
 
-Site::Configuration - access site-local configuration data
+Site::Configuration - Access site-local configuration data
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
@@ -53,7 +53,7 @@ my %configuration = ();
 
 This module reads configuration files from /etc/siteinfo/ and returns
 the data as tied hashes. The format of the configuration files must be
-Ini files. (TODO: more explaining)
+Ini files.
 
     use Site::Configuration;
 
@@ -70,7 +70,8 @@ Ini files. (TODO: more explaining)
 
 =head2 readconfig SCALAR
 
-read the given configuration file and return a tied hash
+read the given configuration file and return a tied hash For more
+documentation on tied hashes and Ini files see L<Config::IniFiles>.
 
 =cut
 
@@ -101,6 +102,8 @@ sub readconfig($) {
 
 look up the first element of LIST as a section in vo.conf, and the second
 element as the key in that section. Return the associated value, if any.
+CAVEAT: this is all but deprecated because it's going to move
+to the vo-support package.
 
 =cut
 
@@ -126,44 +129,13 @@ Dennis van Dok, C<< <dennisvd at nikhef.nl> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-site-configuration at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Site-Configuration>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
-
+Please report any bugs or feature requests to C<grid-mw-security-support at nikhef.nl>.
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc Site::Configuration
-
-
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker (report bugs here)
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Site-Configuration>
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Site-Configuration>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/Site-Configuration>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Site-Configuration/>
-
-=back
-
-
-=head1 ACKNOWLEDGEMENTS
 
 
 =head1 LICENSE AND COPYRIGHT
