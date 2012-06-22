@@ -3,7 +3,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More tests => 3;
+use Test::More tests => 4;
 
 sub not_in_file_ok {
     my ($filename, %regex) = @_;
@@ -50,6 +50,7 @@ TODO: {
   );
 
   module_boilerplate_ok('lib/Site/Configuration.pm');
+  module_boilerplate_ok('lib/Site/Configuration/VO.pm');
 
 
 }
