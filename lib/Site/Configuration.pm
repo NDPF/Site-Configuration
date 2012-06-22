@@ -31,22 +31,19 @@ Version 0.02
 
 =cut
 
-BEGIN {
-  use Exporter ();
-  our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-  $VERSION = "0.02";
-  @ISA = qw(Exporter);
-  @EXPORT = qw(&get_vo_param &readconfig);
-  %EXPORT_TAGS = ( );
-  @EXPORT_OK = qw( );
+our $VERSION = "0.02";
+
+
+sub new {
+  my $class = shift;
+  my $self = { CONFDIR => "/etc/siteinfo",
+	       CONFSET => {},
+	     };
+
+  if (@_) { $self->{CONFDIR} = shift }
+  bless ($self, $class);
+  return $self;
 }
-
-our @EXPORT_OK;
-
-our $confdir = "/etc/siteinfo";
-
-# configuration holds all of the hashes tied into INI files.
-my %configuration = ();
 
 
 =head1 SYNOPSIS
@@ -75,11 +72,22 @@ documentation on tied hashes and Ini files see L<Config::IniFiles>.
 
 =cut
 
-sub readconfig($) {
-  my $conf = shift;
-  # don't read the configuration again.
-  return $configuration{$conf} if defined $configuration{$conf};
+# getter/setter
+sub confdir {
+  my $self = shift;
+  if (@_) { $self->{CONFDIR} = shift }
+  return $self->{CONFDIR};
+}
 
+
+sub readconfig {
+  my $self = shift;
+  my $conf = shift;
+
+  return $self->{CONFSET}->{$conf} if defined $self->{CONFSET}->{$conf};
+
+  # 
+  my $confdir = $self->{CONFDIR};
   # Sanity: does the configuration file exist?
   -f "$confdir/$conf" or croak "Missing configuration file $confdir/$conf, stopping";
 
@@ -90,11 +98,10 @@ sub readconfig($) {
       -allowcontinue => 1,
       -nocase => 1) or
 	do {
-	  print STDERR $_ foreach @Config::IniFiles::errors;
+	  carp $_ foreach @Config::IniFiles::errors;
 	  croak "Can't read configuration file $conf, stopped"
 	};
-  # store the configuration hash. Why must this be a ref?
-  $configuration{$conf} = \%ini;
+  $self->{CONFSET}->{$conf} = \%ini;
   return \%ini;
 };
 
@@ -108,21 +115,21 @@ to the vo-support package.
 =cut
 
 # Arguments: vo, param
-sub get_vo_param($$) {
-  my $vo = shift;
-  my $param = shift;
-
-  if (! $configuration{"vo.conf"}) {
-    readconfig("vo.conf");
-  }
-
-  if ($configuration{"vo.conf"}{$vo}{$param}) {
-    return $configuration{"vo.conf"}{$vo}{$param};
-  } else {
-    return $configuration{"vo.conf"}->{DEFAULT}{$param};
-  }
-}
-
+###sub get_vo_param($$) {
+###  my $vo = shift;
+###  my $param = shift;
+###
+###  if (! $configuration{"vo.conf"}) {
+###    readconfig("vo.conf");
+###  }
+###
+###  if ($configuration{"vo.conf"}{$vo}{$param}) {
+###    return $configuration{"vo.conf"}{$vo}{$param};
+###  } else {
+###    return $configuration{"vo.conf"}->{DEFAULT}{$param};
+###  }
+###}
+###
 =head1 AUTHOR
 
 Dennis van Dok, C<< <dennisvd at nikhef.nl> >>
