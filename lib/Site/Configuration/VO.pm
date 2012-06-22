@@ -78,10 +78,11 @@ $voconf->get_vo_param("VO", "param", [ "fqan" ])
 sub get_vo_param {
   my $self = shift;
   my ($vo, $param, $fqan) = @_;
+  if (!defined $fqan) { $fqan = "DEFAULT" }
   # check if we already have the VO
-  if ( defined $self->{VOCONF}->{$vo}) { }
-  else {
-    # use the siteconfig to read the VO if not
+  if ( ! defined $self->{VOCONF}->{$vo}) { 
+    $self->{VOCONF}->{$vo} = $self->{SITECONFIG}->readconfig($vo . ".conf");
+    # TODO: better exception handling
   }
   # look up the parameter
   my $val = $self->{VOCONF}->{$vo}->{$fqan}{$param};
