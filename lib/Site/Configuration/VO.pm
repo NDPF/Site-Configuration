@@ -54,10 +54,19 @@ Constructor for a new object.
 sub new {
   my $class = shift;
   my $self = { SITECONFIG => Site::Configuration->new("/etc/vo-support"),
-	       VOCONF => {}
+	       VOCONF => {},
+	       ERRMSG => []
 	     };
   bless ($self, $class);
   return $self;
+}
+
+# return and clear
+sub errmsg {
+  my $self = shift;
+  my @ret = @{$self->{ERRMSG}};
+  $self->{ERRMSG} = [];
+  return @ret;
 }
 
 =head2 confdir
@@ -80,13 +89,42 @@ sub get_vo_param {
   my ($vo, $param, $fqan) = @_;
   if (!defined $fqan) { $fqan = "DEFAULT" }
   # check if we already have the VO
-  if ( ! defined $self->{VOCONF}->{$vo}) { 
-    $self->{VOCONF}->{$vo} = $self->{SITECONFIG}->readconfig($vo . ".conf");
-    # TODO: better exception handling
-  }
+  $self->_readvo($vo) or return undef;
   # look up the parameter
   my $val = $self->{VOCONF}->{$vo}->{$fqan}{$param};
   return $val;
+}
+
+=head2 get_fqans
+
+=cut
+
+sub get_fqans {
+  my $self = shift;
+  my $vo = shift;
+  my @fqans = (); # return value.
+  $self->_readvo($vo) or return undef;
+  for my $section (keys $self->{VOCONF}->{$vo}) {
+    if ($section =~ m{^/[[:alpha:]]}) {
+      push @fqans, $section
+    }
+  }
+  return @fqans;
+}
+
+sub _readvo {
+  my $self = shift;
+  my $vo = shift;
+  # read vo configuration only once
+  if ( ! defined $self->{VOCONF}->{$vo}) {
+    $self->{VOCONF}->{$vo} = $self->{SITECONFIG}->readconfig($vo . ".conf");
+  }
+  if ( ! defined $self->{VOCONF}->{$vo}) {
+    push $self->{ERRMSG}, $_ foreach $self->{SITECONFIG}->errmsg();
+    push $self->{ERRMSG}, "Cannot not read configuration for VO '$vo'.\n";
+    return undef;
+  }
+  return $self->{VOCONF}->{$vo};
 }
 
 =head1 AUTHOR

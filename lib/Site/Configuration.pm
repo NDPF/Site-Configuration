@@ -18,7 +18,6 @@ package Site::Configuration;
 use 5.006;
 use strict;
 use warnings;
-use Carp;
 use Config::IniFiles;
 
 =head1 NAME
@@ -38,6 +37,7 @@ sub new {
   my $class = shift;
   my $self = { CONFDIR => "/etc/siteinfo",
 	       CONFSET => {},
+	       ERRMSG => []
 	     };
 
   if (@_) { $self->{CONFDIR} = shift }
@@ -79,6 +79,13 @@ sub confdir {
   return $self->{CONFDIR};
 }
 
+# return and clear
+sub errmsg {
+  my $self = shift;
+  my @ret = @{$self->{ERRMSG}};
+  $self->{ERRMSG} = [];
+  return @ret;
+}
 
 sub readconfig {
   my $self = shift;
@@ -89,7 +96,9 @@ sub readconfig {
   # 
   my $confdir = $self->{CONFDIR};
   # Sanity: does the configuration file exist?
-  -f "$confdir/$conf" or croak "Missing configuration file $confdir/$conf, stopping";
+  -f "$confdir/$conf" or do {
+    push @{$self->{ERRMSG}}, sprintf "Missing configuration file %s.\n", "$confdir/$conf";
+    return undef };
 
   tie my %ini, 'Config::IniFiles',
     ( -file => "$confdir/$conf", 
@@ -98,8 +107,9 @@ sub readconfig {
       -allowcontinue => 1,
       -nocase => 1) or
 	do {
-	  carp $_ foreach @Config::IniFiles::errors;
-	  croak "Can't read configuration file $conf, stopped"
+	  push $self->{ERRMSG}, "There was an error reading configuration file $confdir/$conf:";
+	  push $self->{ERRMSG}, $_ foreach @Config::IniFiles::errors;
+	  return undef;
 	};
   $self->{CONFSET}->{$conf} = \%ini;
   return \%ini;
