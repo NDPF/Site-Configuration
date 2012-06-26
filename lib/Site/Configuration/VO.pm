@@ -100,7 +100,7 @@ sub _readvo {
   }
   if ( ! defined $self->{VOCONF}->{$vo}) {
     push @{$self->{ERRMSG}}, $_ foreach $self->{SITECONFIG}->errmsg();
-    push @{$self->{ERRMSG}}, "Cannot not read configuration for VO '$vo'.\n";
+    push @{$self->{ERRMSG}}, "Cannot not read configuration for VO '$vo'.";
     return undef;
   }
   return $self->{VOCONF}->{$vo};
