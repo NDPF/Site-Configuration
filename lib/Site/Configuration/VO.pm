@@ -83,7 +83,7 @@ sub get_fqans {
   my $vo = shift;
   my @fqans = (); # return value.
   $self->_readvo($vo) or return undef;
-  for my $section (keys $self->{VOCONF}->{$vo}) {
+  for my $section (keys %{$self->{VOCONF}->{$vo}}) {
     if ($section =~ m{^/[[:alpha:]]}) {
       push @fqans, $section
     }
@@ -99,8 +99,8 @@ sub _readvo {
     $self->{VOCONF}->{$vo} = $self->{SITECONFIG}->readconfig($vo . ".conf");
   }
   if ( ! defined $self->{VOCONF}->{$vo}) {
-    push $self->{ERRMSG}, $_ foreach $self->{SITECONFIG}->errmsg();
-    push $self->{ERRMSG}, "Cannot not read configuration for VO '$vo'.\n";
+    push @{$self->{ERRMSG}}, $_ foreach $self->{SITECONFIG}->errmsg();
+    push @{$self->{ERRMSG}}, "Cannot not read configuration for VO '$vo'.\n";
     return undef;
   }
   return $self->{VOCONF}->{$vo};
