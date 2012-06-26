@@ -1,5 +1,18 @@
 Revision history for Site-Configuration
 
+0.03    2012-06-26 14:46
+
+	The modules have been extensively refactored to be properly
+	Object Oriented. Documentation is updated accordingly.
+
+	VO.pm is added to access VO configuration and FQANs.
+
+0.02    2012-06-07 15:55
+
+	readconfig() returns a reference to the bound hash instead of
+	a copy, so changes may be written back.
+
 0.01    2012-06-01 23:41
-        First version, released on an unsuspecting world.
+
+        First version, unreleased
 
