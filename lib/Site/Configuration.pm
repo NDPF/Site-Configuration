@@ -134,8 +134,8 @@ sub readconfig {
       -allowcontinue => 1,
       -nocase => 1) or
 	do {
-	  push $self->{ERRMSG}, "There was an error reading configuration file $confdir/$conf:";
-	  push $self->{ERRMSG}, $_ foreach @Config::IniFiles::errors;
+	  push @{$self->{ERRMSG}}, "There was an error reading configuration file $confdir/$conf:";
+	  push @{$self->{ERRMSG}}, $_ foreach @Config::IniFiles::errors;
 	  return undef;
 	};
   $self->{CONFSET}->{$conf} = \%ini;
