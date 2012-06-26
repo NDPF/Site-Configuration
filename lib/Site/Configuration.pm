@@ -124,7 +124,7 @@ sub readconfig {
   my $confdir = $self->{CONFDIR};
   # Sanity: does the configuration file exist?
   -f "$confdir/$conf" or do {
-    push @{$self->{ERRMSG}}, sprintf "Missing configuration file %s.\n", "$confdir/$conf";
+    push @{$self->{ERRMSG}}, sprintf "Missing configuration file %s.", "$confdir/$conf";
     return undef };
 
   tie my %ini, 'Config::IniFiles',
