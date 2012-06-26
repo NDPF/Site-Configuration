@@ -82,7 +82,7 @@ sub get_fqans {
   my $self = shift;
   my $vo = shift;
   my @fqans = (); # return value.
-  $self->_readvo($vo) or return undef;
+  $self->_readvo($vo) or return ();
   for my $section (keys %{$self->{VOCONF}->{$vo}}) {
     if ($section =~ m{^/[[:alpha:]]}) {
       push @fqans, $section
@@ -169,8 +169,9 @@ see L<Config::IniFiles>.
 
 =head2 Error Handling
 
-In case of errors, get_fqans() and get_vo_param() return undef and the array
-of error messages may be retrieved using the errmsg() method.
+In case of errors, get_fqans() returns an empty list and
+get_vo_param() returns undef.  The array of error messages may be
+retrieved using the errmsg() method.
 
       print STDERR "$_\n" foreach $voconf->errmsg();
 
