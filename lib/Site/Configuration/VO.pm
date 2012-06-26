@@ -22,32 +22,24 @@ use Site::Configuration;
 
 =head1 NAME
 
-Site::Configuration::VO - Access site-local VO configuration data
+Site::Configuration::VO - Access Virtual Organisation configuration
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
-
-Perhaps a little code snippet.
-
     use Site::Configuration::VO;
 
-    my $foo = Site::Configuration::VO->new();
-    ...
+    my $voconf = Site::Configuration::VO->new();
+    my $fqans = $voconf->get_fqans(I<vo>);
+    my $param = $voconf->get_vo_param(I<vo>,I<param> [, I<fqan> ] )
 
-=head1 SUBROUTINES/METHODS
-
-=head2 new
-
-Constructor for a new object.
 
 =cut
 
@@ -69,20 +61,11 @@ sub errmsg {
   return @ret;
 }
 
-=head2 confdir
-
-=cut
-
 sub confdir {
   my $self = shift;
   return $self->{SITECONFIG}->confdir(@_); # transparent?
 }
 
-=head2 get_vo_param
-
-$voconf->get_vo_param("VO", "param", [ "fqan" ])
-
-=cut
 
 sub get_vo_param {
   my $self = shift;
@@ -94,10 +77,6 @@ sub get_vo_param {
   my $val = $self->{VOCONF}->{$vo}->{$fqan}{$param};
   return $val;
 }
-
-=head2 get_fqans
-
-=cut
 
 sub get_fqans {
   my $self = shift;
@@ -127,55 +106,94 @@ sub _readvo {
   return $self->{VOCONF}->{$vo};
 }
 
+=head1 DESCRIPTION
+
+The Site::Configuration::VO module provides read access to the
+configuration of Virtual Organisations on the local system. Like
+Site::Configuration, the configuration files are in Ini file format,
+one file per VO. The default directory to look for configuration files
+is /etc/vo-support, but it can be overridden by using the confdir
+object method.
+
+VO configuration is organised in a single file named I<vo>.conf, with
+sections for each FQAN. Settings that are global to the VO go in the
+top section called [DEFAULT], but this section header may be
+omitted. Any settings preceding the first FQAN is considered to be in
+the [DEFAULT] section.
+
+The constructor accepts a single optional argument, which is the directory
+to read the VO configuration files from.
+
+    my $voconf = Site::Configuration::VO->new();
+    my $voconf = Site::Configuration::VO->new("/etc/othervos");
+
+The configuration directory may be changed by using the confdir() method.
+
+    my $oldconfig = $voconfig->confdir();
+    $voconf->confdir("/etc/othervo");
+
+Be aware that changing the directory after accessing a VO's parameters won't work
+as Site::Configuration::VO keeps the handle to the original file.
+
+The FQANs for a VO are enumerated with the get_fqans() method.
+
+    my @fqans = $voconf->get_fqans(I<vo>);
+
+Specific VO parameters are retrieved with the get_vo_param() method.
+
+    my $defaultse = $voconf->get_vo_param(pvier, "defaultse")
+    my $poolprefix = $voconf->get_vo_param(pvier, "poolprefix", "/pvier" )
+
+The first form retrieves a VO global parameter. The second form looks up a
+parameter in a specific FQAN section.
+
+=head2 File Format
+
+The VO configuration files are found in /etc/vo-support/I<vo>.conf, unless the
+directory was changed as described above. The files are in Ini file format,
+see L<Config::IniFiles>.
+
+    # example configuration file for pvier
+    SoftwareDir = /data/esia/pvier
+    DefaultSE = tbn18.nikhef.nl
+
+    [/pvier]
+    poolaccounts = 30
+    poolprefix = pvier
+    groupmapping = pvier
+
+    [/pvier/Role=lcgadmin]
+    poolprefix = pvsgm
+    poolaccounts = 10
+
+
+=head2 Error Handling
+
+In case of errors, get_fqans() and get_vo_param() return undef and the array
+of error messages may be retrieved using the errmsg() method.
+
+      print STDERR "$_\n" foreach $voconf->errmsg();
+
+Any errors that occur on consecutive calls will accumulate in this array;
+the errmsg() method clears the array again.
+
+=head1 FILES
+
+/etc/vo-support/*.conf
+
+=head1 SEE ALSO
+
+L<Site::Configuration>, L<Config::IniFiles>
+
 =head1 AUTHOR
 
-Dennis van Dok, C<< <dennisvd at nikhef.nl> >>
+Dennis van Dok <dennisvd@nikhef.nl>
 
-=head1 BUGS
+Please report any bugs or feature requests to <grid-mw-security-support@nikhef.nl>.
 
-Please report any bugs or feature requests to C<bug-site-configuration at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Site-Configuration>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
+=head1 COPYRIGHT AND LICENSE
 
-
-
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc Site::Configuration::VO
-
-
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker (report bugs here)
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Site-Configuration>
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Site-Configuration>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/Site-Configuration>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Site-Configuration/>
-
-=back
-
-
-=head1 ACKNOWLEDGEMENTS
-
-
-=head1 LICENSE AND COPYRIGHT
-
-Copyright 2012 Dennis van Dok.
+Copyright 2012 Stichting FOM
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -191,5 +209,6 @@ limitations under the License.
 
 
 =cut
+
 
 1; # End of Site::Configuration::VO
