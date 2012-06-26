@@ -26,7 +26,7 @@ Site::Configuration - Access site-local configuration data
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
@@ -48,27 +48,54 @@ sub new {
 
 =head1 SYNOPSIS
 
-This module reads configuration files from /etc/siteinfo/ and returns
-the data as tied hashes. The format of the configuration files must be
-Ini files.
-
     use Site::Configuration;
-
-    my $ceconf = readconfig("ce.conf");
-
+    my $siteconf = Site::Configuration->new();
+    my $ce = $siteconf->readconfig("ce.conf");
     my $node = $ce->{CE};
+    my $queues = $ce->{$node}{queues};
 
-    ...
+=head1 DESCRIPTION
 
-=head1 EXPORT
+The Site::Configuration module offers an interface into the local
+configuration data stored in Ini files. There is currently no
+enforcement of the structure of any of the configuration files other
+than a few basic formatting rules, so essentially it is now little
+more than a thin shell around L<Config::IniFiles>.
 
+The constructor accepts one optional argument, the name of a
+configuration directory to use. The default value is
+C</etc/site-info/>.
 
-=head1 SUBROUTINES/METHODS
+    my $siteconfig = Site::Configuration->new("/etc/alt-site");
 
-=head2 readconfig SCALAR
+The configuration directory may be read and set using the confdir() method:
 
-read the given configuration file and return a tied hash For more
-documentation on tied hashes and Ini files see L<Config::IniFiles>.
+    my $oldconfdir = $siteconfig->confdir();
+    $siteconfig->confdir("/etc/another-site");
+
+Reading a configuration file is triggered by the readconfig() method.
+
+    my $ceconf = $siteconfig->readconfig("ce.conf");
+
+The name that is passed should be the file name relative to the configuration
+directory. The returned value is a reference to a tied hash.
+
+Changing the configuration directory only affects reading new
+configuration files; it does not cause existing files to be closed or
+re-read. Site::Configuration keeps internal links to all the opened files
+by their relative name.
+
+=head2 Error handling
+
+If an error occurs, the method readconfig() returns undef and the error
+messages are stored in an internal array, which can be retrieved with $obj->errmsg().
+Calling this method will clear the error, so be sure to store the values. Calling
+readconfig() multiple times without clearing the error messages will cause them
+to accumulate.
+
+    if (!defined $ceconf) {
+        print STDERR "$_\n" foreach $siteconfig->errmsg();
+    }
 
 =cut
 
@@ -115,47 +142,17 @@ sub readconfig {
   return \%ini;
 };
 
-=head2 get_vo_param LIST
+=head1 SEE ALSO
 
-look up the first element of LIST as a section in vo.conf, and the second
-element as the key in that section. Return the associated value, if any.
-CAVEAT: this is all but deprecated because it's going to move
-to the vo-support package.
+L<Config::IniFiles>
 
-=cut
-
-# Arguments: vo, param
-###sub get_vo_param($$) {
-###  my $vo = shift;
-###  my $param = shift;
-###
-###  if (! $configuration{"vo.conf"}) {
-###    readconfig("vo.conf");
-###  }
-###
-###  if ($configuration{"vo.conf"}{$vo}{$param}) {
-###    return $configuration{"vo.conf"}{$vo}{$param};
-###  } else {
-###    return $configuration{"vo.conf"}->{DEFAULT}{$param};
-###  }
-###}
-###
 =head1 AUTHOR
 
-Dennis van Dok, C<< <dennisvd at nikhef.nl> >>
-
-=head1 BUGS
+Dennis van Dok <dennisvd at nikhef.nl>
 
 Please report any bugs or feature requests to C<grid-mw-security-support at nikhef.nl>.
 
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc Site::Configuration
-
-
-=head1 LICENSE AND COPYRIGHT
+=head1 COPYRIGHT AND LICENSE
 
 Copyright 2012 Stichting FOM
 
