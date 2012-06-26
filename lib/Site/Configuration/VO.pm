@@ -37,7 +37,7 @@ our $VERSION = '0.03';
     use Site::Configuration::VO;
 
     my $voconf = Site::Configuration::VO->new();
-    my $fqans = $voconf->get_fqans(I<vo>);
+    my @fqans = $voconf->get_fqans(I<vo>);
     my $param = $voconf->get_vo_param(I<vo>,I<param> [, I<fqan> ] )
 
 
