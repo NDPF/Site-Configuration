@@ -1,5 +1,11 @@
 Revision history for Site-Configuration
 
+0.04    2013-04-23 23:22
+
+	The default VO configuration directory is changed from
+	/etc/vo-support to /etc/vo-support/vos, to match the
+	structure of the vo-support package.
+
 0.03    2012-06-26 14:46
 
 	The modules have been extensively refactored to be properly

@@ -45,7 +45,7 @@ our $VERSION = '0.03';
 
 sub new {
   my $class = shift;
-  my $self = { SITECONFIG => Site::Configuration->new("/etc/vo-support"),
+  my $self = { SITECONFIG => Site::Configuration->new("/etc/vo-support/vos"),
 	       VOCONF => {},
 	       ERRMSG => []
 	     };
@@ -112,7 +112,7 @@ The Site::Configuration::VO module provides read access to the
 configuration of Virtual Organisations on the local system. Like
 Site::Configuration, the configuration files are in Ini file format,
 one file per VO. The default directory to look for configuration files
-is /etc/vo-support, but it can be overridden by using the confdir
+is /etc/vo-support/vos, but it can be overridden by using the confdir
 object method.
 
 VO configuration is organised in a single file named I<vo>.conf, with
@@ -180,7 +180,7 @@ the errmsg() method clears the array again.
 
 =head1 FILES
 
-/etc/vo-support/*.conf
+/etc/vo-support/vos/*.conf
 
 =head1 SEE ALSO
 
