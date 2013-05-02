@@ -1,5 +1,10 @@
 Revision history for Site-Configuration
 
+0.05    2013-04-25 09:06
+
+	Restructuring of the VO package. Add support for
+	writing configuration changes.
+
 0.04    2013-04-23 23:22
 
 	The default VO configuration directory is changed from

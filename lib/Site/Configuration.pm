@@ -19,6 +19,7 @@ use 5.006;
 use strict;
 use warnings;
 use Config::IniFiles;
+use Carp;
 
 =head1 NAME
 
@@ -26,11 +27,11 @@ Site::Configuration - Access site-local configuration data
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = "0.04";
+our $VERSION = "0.05";
 
 
 sub new {
@@ -53,6 +54,8 @@ sub new {
     my $ce = $siteconf->readconfig("ce.conf");
     my $node = $ce->{CE};
     my $queues = $ce->{$node}{queues};
+    $ce->{$node}{SMPsize} = 8;
+    $siteconfig->writeconfig($ce);
 
 =head1 DESCRIPTION
 
@@ -114,13 +117,14 @@ sub errmsg {
   return @ret;
 }
 
+# Readconfig returns a reference to a hash tied to a Config::IniFiles
+# object.
 sub readconfig {
   my $self = shift;
   my $conf = shift;
 
   return $self->{CONFSET}->{$conf} if defined $self->{CONFSET}->{$conf};
 
-  # 
   my $confdir = $self->{CONFDIR};
   # Sanity: does the configuration file exist?
   -f "$confdir/$conf" or do {
@@ -128,11 +132,11 @@ sub readconfig {
     return undef };
 
   tie my %ini, 'Config::IniFiles',
-    ( -file => "$confdir/$conf", 
+    ( -file => "$confdir/$conf",
       -fallback => "DEFAULT",
       -handle_trailing_comment => 1,
       -allowcontinue => 1,
-      -nocase => 1) or
+      -nocase => 0) or
 	do {
 	  push @{$self->{ERRMSG}}, "There was an error reading configuration file $confdir/$conf:";
 	  push @{$self->{ERRMSG}}, $_ foreach @Config::IniFiles::errors;
@@ -141,6 +145,22 @@ sub readconfig {
   $self->{CONFSET}->{$conf} = \%ini;
   return \%ini;
 };
+
+# Writing back the configuration. Argument is the tie reference
+# as returned from readconfig
+
+sub writeconfig {
+  my $self = shift;
+  my $iniref = shift;
+
+  my $ini = tied ( %{$iniref} ) or
+    croak "iniref is not a tied hash";
+  if (!defined $ini->GetFileName()) {
+    push @{$self->{ERRMSG}}, "Writeconfig: Inifile has no associated Filename.";
+    return undef;
+  }
+  return $ini->RewriteConfig();
+}
 
 =head1 SEE ALSO
 
