@@ -319,6 +319,8 @@ letter. Other sections are ignored.
 This method takes a single optional parameter to specify the VO.
     my @fqans = $voconfig->get_fqans(vo => "atlas");
 
+In case of an error, returns an array with just one undefined element
+
 =cut
 
 sub get_fqans {
@@ -331,7 +333,7 @@ sub get_fqans {
   }
 
   my @fqans = (); # return value.
-  $self->_readvo($vo) or return undef;
+  $self->_readvo($vo) or return (undef);
   for my $section (keys %{$self->{VOCONF}->{$vo}}) {
     if ($section =~ m{^/[[:alpha:]]}) {
       push @fqans, $section
